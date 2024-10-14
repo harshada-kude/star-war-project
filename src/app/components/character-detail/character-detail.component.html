@@ -1,0 +1,12 @@
+<div *ngIf="character" class="character-card">
+  <h1 class="character-name">{{ character.name }}</h1>
+  <p>Height: {{ character.height }}</p>
+  <p>Mass: {{ character.mass }}</p>
+  <p>Birth Year: {{ character.birth_year }}</p>
+  <p>Gender: {{ character.gender }}</p>
+  <p>Homeworld: {{ character.homeworld }}</p>
+  <p class="films">Films: {{ character.films?.join(', ') }}</p>
+  <button [ngClass]="['favorite-button', isFavorite ? 'active' :  '']" (click)="toggleFavorite()">
+    <mat-icon>favorite</mat-icon>
+  </button>
+</div>

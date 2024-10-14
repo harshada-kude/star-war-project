@@ -1,0 +1,57 @@
+<app-search (searchChanged)="onSearch($event)"></app-search>
+<mat-paginator #paginator [disabled]="isLoading" [length]="totalPages * 10" [pageSize]="10" (page)="onPageChange($event)"></mat-paginator>
+
+<!-- Loading spinner or message -->
+<div *ngIf="isLoading" class="loading-container">
+  <mat-spinner></mat-spinner>
+  <span>Loading data, please wait...</span>
+</div>
+
+<div *ngIf="!isLoading">
+  <!-- Mobile View -->
+  <div *ngIf="isMobile$ | async; else desktopView">
+    <div class="character-container">
+      <mat-card *ngFor="let character of characters" class="character-card" (click)="goToDetails(character.url)">
+        <mat-card-header class="character-header">
+          <mat-card-title class="character-title">{{ character.name }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="character-content">
+          <p class="character-details"><strong>Height:</strong> {{ character.height }}</p>
+          <p class="character-details"><strong>Mass:</strong> {{ character.mass }}</p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+  <!-- Desktop View -->
+  <ng-template #desktopView>
+    <mat-table [dataSource]="characters" class="mat-elevation-z8">
+      <ng-container matColumnDef="name">
+        <mat-header-cell *matHeaderCellDef> Name </mat-header-cell>
+        <mat-cell *matCellDef="let character"> {{ character.name }} </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="birthYear">
+        <mat-header-cell *matHeaderCellDef> Birth Year </mat-header-cell>
+        <mat-cell *matCellDef="let character"> {{ character.birth_year }} </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="gender">
+        <mat-header-cell *matHeaderCellDef> Gender </mat-header-cell>
+        <mat-cell *matCellDef="let character"> {{ character.gender }} </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="height">
+        <mat-header-cell *matHeaderCellDef> Height </mat-header-cell>
+        <mat-cell *matCellDef="let character"> {{ character.height }} </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="weight">
+        <mat-header-cell *matHeaderCellDef> Mass </mat-header-cell>
+        <mat-cell *matCellDef="let character"> {{ character.mass }} </mat-cell>
+      </ng-container>
+
+      <mat-header-row class="table-header" *matHeaderRowDef="columndefs"></mat-header-row>
+      <mat-row class="table-list" *matRowDef="let row; columns: columndefs;" (click)="goToDetails(row.url)"></mat-row>
+    </mat-table>
+  </ng-template>
+</div>

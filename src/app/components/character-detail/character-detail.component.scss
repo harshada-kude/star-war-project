@@ -1,0 +1,76 @@
+.character-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #e9ecef;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  padding: 30px;
+  max-width: 600px;
+  margin: 20px auto;
+  height: 80vh;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
+  }
+
+  .character-name {
+    font-size: 2.5rem;
+    color: #343a40; // Darker text for visibility
+    margin: 15px 0;
+    padding: 10px;
+    background-color: #007bff; // Blue background for the header
+    color: white; // White text
+    border-radius: 5px;
+    width: 100%;
+    text-align: center;
+  }
+
+  p {
+    font-size: 1.2rem;
+    color: #495057; // Dark gray for the paragraph text
+    margin: 10px 0;
+    padding: 10px;
+    background-color: #f8f9fa; // Light background for paragraphs
+    border-radius: 5px;
+    width: 100%;
+    text-align: left;
+  }
+
+  .films {
+    font-size: 1rem;
+    color: #6c757d; // Lighter gray for films
+  }
+
+  .favorite-button {
+    background-color: lightgray;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 12px 20px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+
+    &.active {
+      background-color: red; //Color when character is favorite
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .character-card {
+    padding: 20px;
+
+    .character-name {
+      font-size: 2rem;
+    }
+
+    p {
+      font-size: 1rem;
+    }
+  }
+}
