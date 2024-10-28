@@ -18,6 +18,11 @@
     "moduleResolution": "bundler",
     "importHelpers": true,
     "target": "ES2022",
+    "paths": {
+      "star-war-loader": [
+        "./dist/star-war-loader"
+      ]
+    },
     "module": "ES2022",
     "lib": [
       "ES2022",

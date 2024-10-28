@@ -1,17 +1,18 @@
 .loading-container {
-    height: 100%;
+    height: calc(100% - 244px);
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-//scss for desktop view
-.table-header {
-    background-color: #007bff; // Blue background for the header
-    color: white;
-}
-.table-list {
-    cursor: pointer;
+.list-container {
+  height: calc(100% - 244px);
+  .no-record {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 }
 
 //scss for mobile view
@@ -62,6 +63,15 @@
         }
       }
     }
+}
+
+.full-height {
+  height: 100%;
+}
+
+.main-container {
+  height: calc(100% - 246px);
+  overflow-y: scroll;
 }
   
   

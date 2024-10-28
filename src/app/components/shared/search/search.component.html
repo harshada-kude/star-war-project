@@ -1,4 +1,13 @@
 <mat-form-field class="search-field" appearance="fill">
-    <mat-label class="search-label">Search by name</mat-label>
-    <input class="search-input" matInput (input)="onSearch($event)" />
+  <mat-label class="search-label">Search by name</mat-label>
+  <input
+    class="search-input"
+    matInput
+    [formControl]="searchControl"
+    placeholder="Enter name"
+  />
+  <button *ngIf="searchControl.value" matSuffix class="clear-icon-button" (click)="clearSearch()">
+    <mat-icon>close</mat-icon>
+  </button>
 </mat-form-field>
+  

@@ -35,12 +35,7 @@
               "@angular/material/prebuilt-themes/azure-blue.css",
               "src/styles.scss"
             ],
-            "scripts": [],
-            "server": "src/main.server.ts",
-            "prerender": true,
-            "ssr": {
-              "entry": "server.ts"
-            }
+            "scripts": []
           },
           "configurations": {
             "production": {
@@ -101,6 +96,72 @@
               "src/styles.scss"
             ],
             "scripts": []
+          }
+        }
+      }
+    },
+    "star-war-loader": {
+      "projectType": "library",
+      "root": "projects/star-war-loader",
+      "sourceRoot": "projects/star-war-loader/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "projects/star-war-loader/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/star-war-loader/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/star-war-loader/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "tsConfig": "projects/star-war-loader/tsconfig.spec.json",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ]
+          }
+        }
+      }
+    },
+    "star-war-toolbar": {
+      "projectType": "library",
+      "root": "projects/star-war-toolbar",
+      "sourceRoot": "projects/star-war-toolbar/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "projects/star-war-toolbar/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/star-war-toolbar/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/star-war-toolbar/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "tsConfig": "projects/star-war-toolbar/tsconfig.spec.json",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ]
           }
         }
       }

@@ -1,10 +1,10 @@
 /**
  * Angular Imports
  */
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { CommonModule } from '@angular/common';
 
 /**
  * Material Imports
@@ -13,19 +13,13 @@ import { MatCardModule } from '@angular/material/card';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
+import { PageEvent } from '@angular/material/paginator';
 
 /**
  * rxjs imports
  */
 import { map, takeWhile } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-
-/**
- * store imports
- */
-import { select, Store } from '@ngrx/store';
-import { selectPage, selectSearchTerm } from '../../store/character/character.selectors';
-import { setPageSize, setPagination, setSearchTerm } from '../../store/character/character.actions';
 
 /**
  * Services
@@ -36,16 +30,24 @@ import { CharacterService } from '../../services/character.service';
  * Components
  */
 import { SearchComponent } from '../shared/search/search.component';
+import { TableComponent } from '../shared/table/table.component';
+import { ToolbarComponent } from '../shared/toolbar/toolbar.component';
 
 /**
  * Models
  */
-import { Character } from '../../models/character.model';
+import { Character, CharacterColumnDef } from '../../models/character.model';
+
+/**
+ * Library
+ */
+import { StarWarLoaderComponent } from 'star-war-loader';
+import { APP_CONSTANTS } from '../../shared/constants';
 
 @Component({
   selector: 'app-character-list',
   standalone: true,
-  imports: [CommonModule, MatTableModule, MatPaginatorModule, SearchComponent, MatCardModule, MatProgressSpinnerModule],
+  imports: [CommonModule, MatTableModule, MatPaginatorModule, MatCardModule, MatProgressSpinnerModule, SearchComponent, StarWarLoaderComponent, TableComponent, ToolbarComponent],
   templateUrl: './character-list.component.html',
   styleUrl: './character-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -60,83 +62,60 @@ export class CharacterListComponent implements OnInit, OnDestroy, AfterViewInit 
   @ViewChild('paginator') paginator!: MatPaginator;
 
   /**
-   * Variable to store pageIndex
-   * @type {number}
-   * @memberof CharacterListComponent
-   */
-  pageIndex: number = 0;
-
-  /**
-   * Variable to store pageSize
-   * @type {number}
-   * @memberof CharacterListComponent
-   */
-  pageSize: number = 10;
-
-  /**
-   * Variable to search term
-   * @type {string}
-   * @memberof CharacterListComponent
-   */
-  searchTerm: string = '';
-
-  /**
-   * Variable to check if component is active or not
-   * @type {boolean}
-   * @memberof CharacterListComponent
-   */
-  compActive : boolean = true;
-
-  /**
    * Variable to store characters
    * @type {Array<Character>}
    * @memberof CharacterListComponent
    */
-  characters: Array<Character> = [];
-
-  /**
-   * Variable to store totalPages
-   * @type {number}
-   * @memberof CharacterListComponent
-   */
-  totalPages: number = 0;
-
-  /**
-   * current page observable
-   * @type {Observable<number>}
-   * @memberof CharacterListComponent
-   */
-  currentPage$: Observable<number>;
-  
-  /**
-   * search term observable
-   * @type {Observable<string>}
-   * @memberof CharacterListComponent
-   */
-  searchTerm$: Observable<string>;
-
-  /**
-   * isMobile Observable
-   * @type {(Observable<boolean> | undefined)}
-   * @memberof CharacterListComponent
-   */
-  isMobile$: Observable<boolean> | undefined;
+  public characters: Array<Character> = [];
 
   /**
    * Column definations
    * @type {Array<string>}
    * @memberof CharacterListComponent
    */
-  columndefs : Array<string> = ['name', 'birthYear', 'gender', 'height', 'weight'];
+  public columnDefs : Array<CharacterColumnDef> = APP_CONSTANTS.CHARACTER_COLUMNS;
+
+  /**
+   * isMobile Observable
+   * @type {(Observable<boolean> | undefined)}
+   * @memberof CharacterListComponent
+   */
+  public isMobile$: Observable<boolean> | undefined;
+
+  /**
+   * Variable to store totalPages
+   * @type {number}
+   * @memberof CharacterListComponent
+   */
+  public totalPages: number = 0;
 
   /**
    * isLoading flag
    * @type {boolean}
    * @memberof CharacterListComponent
    */
-  isLoading: boolean = false;
+  public isLoading: boolean = false;
 
+  /**
+   * Variable to store pageIndex
+   * @type {number}
+   * @memberof CharacterListComponent
+   */
+  private pageIndex: number = 0;
 
+  /**
+   * Variable to search term
+   * @type {string}
+   * @memberof CharacterListComponent
+   */
+  private searchTerm: string = '';
+
+  /**
+   * Variable to check if component is active or not
+   * @type {boolean}
+   * @memberof CharacterListComponent
+   */
+  private compActive : boolean = true;
 
 /**
  * Creates an instance of CharacterListComponent.
@@ -152,10 +131,7 @@ constructor(private breakpointObserver: BreakpointObserver,
               private characterService: CharacterService,
               private cd: ChangeDetectorRef,
               private route: ActivatedRoute,
-              private router: Router,
-              private store: Store) {
-                this.currentPage$ = store.pipe(select(selectPage));
-                this.searchTerm$ = store.pipe(select(selectSearchTerm));
+              private router: Router) {
               }
 
   /**
@@ -180,7 +156,9 @@ constructor(private breakpointObserver: BreakpointObserver,
    * @memberof CharacterListComponent
    */
   ngAfterViewInit(): void {
-    this.paginator.pageIndex = this.pageIndex - 1;
+    if (this.paginator) {
+      this.paginator.pageIndex = this.pageIndex - 1;
+    }
     this.cd.detectChanges();
   }
 
@@ -190,7 +168,7 @@ constructor(private breakpointObserver: BreakpointObserver,
    * @param {string} [searchTerm='']
    * @memberof CharacterListComponent
    */
-  loadCharacters(page: any = 1, searchTerm: string = ''): void {
+  private loadCharacters(page: number = 1, searchTerm: string = ''): void {
     this.isLoading = true;
     this.characterService.getCharacters(page, searchTerm).pipe(takeWhile(() => this.compActive)).subscribe(data => {
       this.characters = data.results;
@@ -205,10 +183,11 @@ constructor(private breakpointObserver: BreakpointObserver,
    * @param {string} searchTerm
    * @memberof CharacterListComponent
    */
-  onSearch(searchTerm: string): void {
-    this.store.dispatch(setSearchTerm({ searchTerm }));
-    this.pageIndex = this.searchTerm ? this.pageIndex : 1;
+  public onSearch(searchTerm: string): void {
     this.searchTerm = searchTerm;
+    if (this.paginator) {
+      this.paginator.pageIndex = this.pageIndex - 1;
+    }
     this.prepareRouteParams();
   }
 
@@ -217,10 +196,8 @@ constructor(private breakpointObserver: BreakpointObserver,
    * @param {*} event
    * @memberof CharacterListComponent
    */
-  onPageChange(event: any): void {
+  public onPageChange(event: PageEvent): void {
     this.pageIndex = event.pageIndex + 1;
-    this.pageSize = event.pageSize;
-
     this.prepareRouteParams();
   }
 
@@ -228,26 +205,26 @@ constructor(private breakpointObserver: BreakpointObserver,
    * Method to prepare route params
    * @memberof CharacterListComponent
    */
-  prepareRouteParams(): void {
-    // Update URL query parameters to reflect the current state
-    this.router.navigate([], {
-      queryParams: {
-        page: this.pageIndex,
-        search: this.searchTerm
-      },
-      queryParamsHandling: 'merge' // To merge new params with existing ones
-    });
+  private prepareRouteParams(): void {
+    const queryParams: any = {}; 
 
-    // Dispatch actions to store the new values in the store
-    this.store.dispatch(setPagination({ page: this.pageIndex }));
-    this.store.dispatch(setPageSize({ pageSize: this.pageSize }));
+    if (this.pageIndex !== undefined && this.pageIndex !== null) {
+        queryParams.page = this.pageIndex;
+    }
+
+    queryParams.search = this.searchTerm || null; 
+
+    this.router.navigate([], {
+        queryParams,
+        queryParamsHandling: 'merge'
+    });
   }
 
   /**
    * Method to check if this is mobile view
    * @memberof CharacterListComponent
    */
-  checkMobileView() {
+  private checkMobileView() {
     this.isMobile$ = this.breakpointObserver.observe([
       Breakpoints.XSmall
     ]).pipe(
@@ -261,7 +238,7 @@ constructor(private breakpointObserver: BreakpointObserver,
    * @param {(string | undefined)} url
    * @memberof CharacterListComponent
    */
-  goToDetails(url: string | undefined) {
+  public goToDetails(url: string | undefined) {
     let id = url?.split('/').slice(-2, -1)[0];
     this.router.navigate(['/character', id]);
   }
@@ -270,14 +247,10 @@ constructor(private breakpointObserver: BreakpointObserver,
    * Method to load route data
    * @memberof CharacterListComponent
    */
-  loadRouteData() {
+  private loadRouteData() {
     this.route.queryParams.pipe(takeWhile(() => this.compActive)).subscribe(params => {
       this.pageIndex = params['page'] ?? 1;
       this.searchTerm = params['search'] ?? '';
-
-      // Dispatch actions to restore the state from URL
-      this.store.dispatch(setPagination({ page: this.pageIndex }));
-      this.store.dispatch(setSearchTerm({ searchTerm: this.searchTerm }));
 
       // Fetch the data based on the restored state
       this.loadCharacters(this.pageIndex, this.searchTerm ?? '');

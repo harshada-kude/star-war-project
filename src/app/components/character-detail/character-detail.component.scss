@@ -9,7 +9,7 @@
   padding: 30px;
   max-width: 600px;
   margin: 20px auto;
-  height: 80vh;
+  height: 75vh;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 
   &:hover {
@@ -59,6 +59,10 @@
       background-color: red; //Color when character is favorite
     }
   }
+}
+
+.character-details-container {
+  
 }
 
 @media (max-width: 768px) {

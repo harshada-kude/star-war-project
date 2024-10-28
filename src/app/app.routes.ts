@@ -1,8 +1,6 @@
 import { Routes } from '@angular/router';
-import { CharacterListComponent } from './components/character-list/character-list.component';
-import { CharacterDetailComponent } from './components/character-detail/character-detail.component';
 
 export const routes: Routes = [
-    { path: '', component: CharacterListComponent },
-    { path: 'character/:id', component: CharacterDetailComponent },
+    { path: '', loadComponent: () => import('./components/character-list/character-list.component').then(m => m.CharacterListComponent)},
+    { path: 'character/:id', loadComponent: () => import('./components/character-detail/character-detail.component').then(m => m.CharacterDetailComponent) },
 ];

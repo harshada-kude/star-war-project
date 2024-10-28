@@ -1,29 +1,56 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Store, select } from '@ngrx/store';
+import { Observable } from 'rxjs';
+import { Favorite } from '../models/favorite.model';
+import { selectAllFavorites } from '../store/favorite/favorite.selectors';
+import { addFavorite, removeFavorite, loadFavorite } from '../store/favorite/favorite.actions';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FavoriteService {
 
-  private favorites: string[] = JSON.parse('[]');
-  // private favorites: string[] = JSON.parse(localStorage.getItem('favorites') || '[]');
-  private favoritesSubject = new BehaviorSubject<string[]>(this.favorites);
+  /**
+   * Creates an instance of FavoriteService.
+   * @param {Store} store
+   * @memberof FavoriteService
+   */
+  constructor(private store: Store) { }
 
-  constructor() { }
-
-  toggleFavorite(characterId: string) {
-    const index = this.favorites.indexOf(characterId);
-    if (index > -1) {
-      this.favorites.splice(index, 1); // Remove from favorites
-    } else {
-      this.favorites.push(characterId); // Add to favorites
-    }
-    // localStorage.setItem('favorites', JSON.stringify(this.favorites));
-    this.favoritesSubject.next(this.favorites);
+  /**
+   * Add favorite character within store
+   * @param {number} characterId
+   * @param {boolean} isFavorite
+   * @memberof FavoriteService
+   */
+  addFavorite(characterId:  number, isFavorite: boolean): void {
+    const newFavorite: Favorite = { characterId: characterId, isFavorite: isFavorite };
+    this.store.dispatch(addFavorite({ favorite: newFavorite }));
   }
 
-  getFavorites(): Observable<string[]> {
-    return this.favoritesSubject.asObservable();
+  /**
+   * Remove favorite character from store
+   * @param {number} characterId
+   * @memberof FavoriteService
+   */
+  removeFavorite(characterId:  number)  {
+    this.store.dispatch(removeFavorite({ characterId }));
+  }
+
+  /**
+   * Get favorite character from store list
+   * @return {*}  {Observable<Favorite[]>}
+   * @memberof FavoriteService
+   */
+  getFavorite(): Observable<Favorite[]> {
+    return this.store.pipe(select(selectAllFavorites));
+  }
+
+  /**
+   * Load favorite character from session storage
+   * @memberof FavoriteService
+   */
+  loadFavoriteFromSession(): void {
+    this.store.dispatch(loadFavorite());
   }
 }

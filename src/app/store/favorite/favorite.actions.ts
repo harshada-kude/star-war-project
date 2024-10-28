@@ -1,6 +1,6 @@
 
 import { createAction, props } from '@ngrx/store';
-import { Favorite } from './favorite.reducer';
+import { Favorite } from '../../models/favorite.model';
 
 //Action to add favorite character
 export const addFavorite = createAction(
@@ -16,6 +16,5 @@ export const removeFavorite = createAction(
 
 //Action to load favorite character
 export const loadFavorite = createAction(
-  '[Favorite] Load Favorites',
-  props<{ favorites: Favorite[] }>()
+  '[Favorite] Load Favorites'
 );

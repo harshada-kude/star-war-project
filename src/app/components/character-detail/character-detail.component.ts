@@ -1,9 +1,10 @@
 /**
  * Angular Imports
  */
+import { ActivatedRoute } from '@angular/router';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common';
 
 /**
  * Material Imports
@@ -13,32 +14,36 @@ import { MatIconModule } from '@angular/material/icon';
 /**
  * rxjs Imports
  */
-import { Observable, takeWhile } from 'rxjs';
-import { select, Store } from '@ngrx/store';
+import { takeWhile } from 'rxjs';
 
-/**
- * store imports
- */
-import { Favorite } from '../../store/favorite/favorite.reducer';
-import { selectAllFavorites } from '../../store/favorite/favorite.selectors';
-import { addFavorite, removeFavorite } from '../../store/favorite/favorite.actions';
 
 /**
  * Services
  */
-import { CharacterService } from '../../services/character.service';
+import { CharacterDetailService } from '../../services/character-detail.service';
+import { FavoriteService } from '../../services/favorite.service';
 
 /**
  * Models
  */
 import { Character } from '../../models/character.model';
 
+/**
+ * Custom Library
+ */
+import { StarWarLoaderComponent } from 'star-war-loader';
+
+/**
+ * Shared Component
+ */
+import { ToolbarComponent } from '../shared/toolbar/toolbar.component';
+
 
 
 @Component({
   selector: 'app-character-detail',
   standalone: true,
-  imports: [CommonModule, MatIconModule],
+  imports: [CommonModule, MatIconModule, StarWarLoaderComponent, ToolbarComponent],
   templateUrl: './character-detail.component.html',
   styleUrl: './character-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -50,51 +55,53 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
    * @type {Character}
    * @memberof CharacterDetailComponent
    */
-  character: Character = {};
+  public character: Character = {};
 
   /**
    * Variable to store CharacterId
    * @type {number}
    * @memberof CharacterDetailComponent
    */
-  characterId: number = 0;
+  private characterId: number = 0;
 
   /**
    * Variable to check if component is active or not
    * @type {boolean}
    * @memberof CharacterDetailComponent
    */
-  compActive: boolean = true;
-
-  /**
-   * Favorite Observable
-   * @type {Observable<Favorite[]>}
-   * @memberof CharacterDetailComponent
-   */
-  favorite$: Observable<Favorite[]>;
+  private compActive: boolean = true;
 
   /**
    * Variable to check if character is favorite or not
    * @type {boolean}
    * @memberof CharacterDetailComponent
    */
-  isFavorite: boolean = false;
+  public isFavorite: boolean = false;
+
+  /**
+   * isLoading flag
+   * @type {boolean}
+   * @memberof CharacterListComponent
+   */
+  public isLoading: boolean = false;
 
   /**
    * Creates an instance of CharacterDetailComponent.
    * @param {ChangeDetectorRef} cd
-   * @param {CharacterService} characterService
+   * @param {characterDetailService} characterDetailService
+   * @param {FavoriteService} favoriteServ
+   * @param {Location} location
    * @param {ActivatedRoute} route
-   * @param {Store} store
    * @memberof CharacterDetailComponent
    */
   constructor(
     private cd : ChangeDetectorRef,
-    private characterService: CharacterService,
-    private route: ActivatedRoute,
-    private store: Store
+    private characterDetailService: CharacterDetailService,
+    private favoriteServ: FavoriteService,
+    private location: Location,
+    private route: ActivatedRoute
   ) {
-    this.favorite$ = this.store.pipe(select(selectAllFavorites));
+    this.loadFavoriteFromSession();
   }
 
   /**
@@ -114,15 +121,25 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Method to load Favorite from Session
+   * @memberof CharacterDetailComponent
+   */
+  private loadFavoriteFromSession(): void {
+    this.favoriteServ.loadFavoriteFromSession();
+  }
+
+  /**
    * Method to subscribe Character Details
    * @param {number} characterId
    * @memberof CharacterDetailComponent
    */
-  subscribeCharacterDetails(characterId: number): void {
-    this.characterService.getCharacterDetails(characterId).pipe(takeWhile(() => this.compActive)).subscribe(data => {
+  private subscribeCharacterDetails(characterId: number): void {
+    this.isLoading = true;
+    this.characterDetailService.getCharacterDetails(characterId).pipe(takeWhile(() => this.compActive)).subscribe(data => {
       this.character = data;
       this.characterId = characterId;
       this.subscribeFavoriteState();
+      this.isLoading = false;
       this.cd.detectChanges();
     });
   }
@@ -131,9 +148,9 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
    * Method to subscribe favorite state
    * @memberof CharacterDetailComponent
    */
-  subscribeFavoriteState(): void {
-    this.store.pipe(select(selectAllFavorites)).pipe(takeWhile(()=> this.compActive)).subscribe(favorite => {
-      this.isFavorite = favorite.some(favorite => favorite.characterId === this.characterId);
+  private subscribeFavoriteState(): void {
+    this.favoriteServ.getFavorite().pipe(takeWhile(()=> this.compActive)).subscribe(favorites => {
+      this.isFavorite = favorites.some(favorite => favorite.characterId === this.characterId);
     });
   }
 
@@ -141,7 +158,7 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
    * Method to toggle Favorite Character
    * @memberof CharacterDetailComponent
    */
-  toggleFavorite() : void{
+  public toggleFavorite() : void{
     this.isFavorite ? this.removeFavorite(this.characterId) : this.addFavorite();
   }
 
@@ -149,16 +166,23 @@ export class CharacterDetailComponent implements OnInit, OnDestroy {
    * Method to add Favorite Character to store
    * @memberof CharacterDetailComponent
    */
-  addFavorite() : void {
-    const newFavorite: Favorite = { characterId: this.characterId, isFavorite: true };
-    this.store.dispatch(addFavorite({ favorite: newFavorite }));
+  private addFavorite() : void {
+    this.favoriteServ.addFavorite(this.characterId, true);
   }
 
   /**
    * Method to remove Favorite Character from store
    * @memberof CharacterDetailComponent
    */
-  removeFavorite(characterId: number) : void {
-    this.store.dispatch(removeFavorite({ characterId }));
+  private removeFavorite(characterId: number) : void {
+    this.favoriteServ.removeFavorite(characterId);
+  }
+
+  /**
+   * Method to nagigate Back
+   * @memberof CharacterDetailComponent
+   */
+  public navigateBack(): void {
+    this.location.back();
   }
 }

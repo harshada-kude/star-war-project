@@ -1,3 +1,13 @@
+<!-- Shared Toolbar Component -->
+<app-toolbar class="toolbar"
+  title="Character Details"
+  [showBackButton]="true"
+  (backButtonClick)="navigateBack()"
+></app-toolbar>
+
+<!-- Custom Library for Loader -->
+<lib-star-war-loader [isLoading]="isLoading"></lib-star-war-loader>
+
 <div *ngIf="character" class="character-card">
   <h1 class="character-name">{{ character.name }}</h1>
   <p>Height: {{ character.height }}</p>

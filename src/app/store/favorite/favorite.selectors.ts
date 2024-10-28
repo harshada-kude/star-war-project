@@ -1,6 +1,6 @@
 // src/app/store/character/character.selectors.ts
 import { createSelector, createFeatureSelector } from '@ngrx/store';
-import { FavoriteState } from './favorite.reducer';
+import { FavoriteState } from '../../models/favorite.model';
 
 export const selectFavoriteState = createFeatureSelector<FavoriteState>('favorite');
 

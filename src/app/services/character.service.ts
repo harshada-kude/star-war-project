@@ -15,6 +15,11 @@ import { catchError } from 'rxjs/operators';
  */
 import { APP_CONSTANTS } from '../shared/constants';
 
+/**
+ * Models
+ */
+import { Character, CharacterResObj } from '../models/character.model';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -38,29 +43,30 @@ export class CharacterService {
    * Method to get all the Characters based on pagination & search param
    * @param {number} page
    * @param {string} [searchParam]
-   * @return {*}  {Observable<any>}
+   * @return {*}  {Observable<CharacterResObj>}
    * @memberof CharacterService
    */
-  getCharacters(page: number, searchParam?: string): Observable<any> {
+  getCharacters(page: number, searchParam?: string): Observable<CharacterResObj> {
     const queryParam = new URLSearchParams();
-    queryParam.set('page', page.toString());
 
     if (searchParam) {
-      queryParam.set('search', searchParam);
+        queryParam.set('search', searchParam);
+    } else {
+        queryParam.set('page', page.toString());
     }
 
-    return this.http.get(`${this.peopleUrl}?${queryParam.toString()}`).pipe(
-      catchError(this.handleError)
+    return this.http.get<CharacterResObj>(`${this.peopleUrl}?${queryParam.toString()}`).pipe(
+        catchError(this.handleError)
     );
   }
 
   /**
    * Method to get single character details
    * @param {number} id
-   * @return {*}  {Observable<any>}
+   * @return {*}  {Observable<Character>}
    * @memberof CharacterService
    */
-  getCharacterDetails(id: number): Observable<any> {
+  getCharacterDetails(id: number): Observable<Character> {
     return this.http.get(`${this.peopleUrl}${id}/`).pipe(
       catchError(this.handleError)
     );
@@ -73,7 +79,7 @@ export class CharacterService {
    * @return {*}  {Observable<never>}
    * @memberof CharacterService
    */
-  private handleError(error: any): Observable<never> {
+  private handleError(error: Error): Observable<never> {
     return throwError('Something went wrong; please try again later.');
   }
 }
